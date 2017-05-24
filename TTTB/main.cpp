@@ -7,23 +7,29 @@
 using namespace std;
 using namespace cv;
 
+//Debug variable
 bool debug = true;
 
 const char *source_window = "Source Image";
 const char *result_window = "Visualization";
 
+//Path for images used in debugging/testing.
 const string pathTempl = "C:/Users/Raul Juarez/Pictures/images/cross-template.png";
 const string pathDebug = "C:/Users/Raul Juarez/Pictures/images/test2.png";
 
+//These values define the player and the AI's symbol. (Either x or o).
 string player;
 string pc;
 
+//The default camera is 0.
 int cameraID = 0;
+//These variables define the position of each piece in the image captured.
 int __x1, __x2, __x3;
 int __y1, __y2, __y3;
 
 Mat source, vis, templ;
 
+//Creating a Piece object with its x and y position, along with its value.
 class Piece {
 public:
 	string print();
@@ -37,26 +43,31 @@ private:
 	string val;
 };
 
+//Returns the Piece's symbol.
 string Piece::print()
 {
 	return val;
 }
 
+//Returns position in X.
 int Piece::getX()
 {
 	return x;
 }
 
+//Returns position in Y.
 int Piece::getY()
 {
 	return y;
 }
 
+//Default value for symbol is - or null.
 Piece::Piece()
 {
 	val = "-";
 }
 
+//Constructor for complete Piece object.
 Piece::Piece(double posX, double posY, string value)
 {
 	x = posX;
@@ -64,8 +75,10 @@ Piece::Piece(double posX, double posY, string value)
 	val = value;
 }
 
+//Create a 3x3 board.
 Piece board[3][3];
 
+//Method used to add a Piece to the 3x3 board. Requieres a Point (x and y values) and its symbol.
 void addPiece(Point point, string value) {
 	if (point.x > 0 && point.x < __x1) {
 		if (point.y > 0 && point.y < __y1) {
@@ -100,28 +113,34 @@ void addPiece(Point point, string value) {
 			board[2][2] = Piece(point.x, point.y, value);
 		}
 	}
+	//What the fuck went wrong?
 	else {
 		cout << "Something horrible happened." << endl;
 	}
 }
 
+//Calculate next move to send to Arduino.
 void getNextMove() {
-	for (int i = 0; i < 2; i++) {
-		if (board[i][0].print() == board[i][1].print()) {
-			if (board[i][2].print() == "-") {
-				if (board[i][0].print == pc) {
-					//WIN
-				}
-			}
-		}
+	int rand1, rand2, next;
 
-		for (int j = 0; j < 2; j++) {
-			if (board[i][j].print() == board[i][j + 1].print()) {
-			}
+	while (true) {
+		//Random number from 0 to 2.
+		rand1 = rand() % 3;
+		rand2 = rand() % 3;
+
+		if (board[rand1][rand2].print() == "-") {
+			//Next Move is defined by the position the which will be played next.
+			//|1|2|3|
+			//|4|5|6|
+			//|7|8|9|
+			next = rand1 + (rand2 * 3) + 1;
+			connect(next);
+			return;
 		}
 	}
 }
 
+//Camera capture method.
 Mat cameraCapture() {
 	VideoCapture cap(cameraID);
 	Mat capture;
